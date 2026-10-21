@@ -291,6 +291,9 @@ dialog[open]{animation:pop 260ms var(--ease)}
 .dprices{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .dprices .pp{font-size:1.125rem;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px}
 
+body[data-route="menu"] .top{position:relative;top:auto}
+body[data-route="menu"] .mtools{top:env(safe-area-inset-top,0px)}
+body[data-route="menu"] .grp{scroll-margin-top:140px}
 /* ---------- shops ---------- */
 .shops{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(24px,4vw,56px);align-items:start}
 .shops>*{min-width:0}
@@ -816,7 +819,7 @@ function chipRow(el,items,cur,onPick){
 function afterFilter(refocus){
   const pc=$("#menuFilters .chip[aria-pressed=\"true\"]");
   if(pc){const c=pc.parentElement; c.scrollLeft=pc.offsetLeft-(c.clientWidth-pc.offsetWidth)/2; if(refocus) pc.focus({preventScroll:true});}
-  const b=$("#menuBoard"), off=$(".top").offsetHeight+$(".mtools").offsetHeight+8;
+  const b=$("#menuBoard"), off=$(".mtools").offsetHeight+8;
   const y=b.getBoundingClientRect().top+scrollY-off;
   if(scrollY>y) scrollTo({top:y,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
 }
@@ -884,6 +887,7 @@ const ROUTES=["at","menu","coffee","shops","merch","club"];
 function go(r,focus){
   if(!ROUTES.includes(r)) r="at";
   const changed=r!==route; route=r;
+  document.body.dataset.route=r;
   $$(".view").forEach(v=>v.hidden=v.dataset.view!==r);
   $$("[data-r]").forEach(a=>a.dataset.r===r?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
   document.title=t("titles")[r];
