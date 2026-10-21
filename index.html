@@ -291,8 +291,8 @@ dialog[open]{animation:pop 260ms var(--ease)}
 .dprices{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .dprices .pp{font-size:1.125rem;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px}
 
-body[data-route="menu"] .top{position:relative;top:auto}
-body[data-route="menu"] .mtools{top:env(safe-area-inset-top,0px)}
+body[data-route="menu"] .top{translate:0 calc(-1 * var(--hs,0px))}
+body[data-route="menu"] .mtools{top:calc(env(safe-area-inset-top,0px) + var(--hh,72px) - var(--hs,0px))}
 body[data-route="menu"] .grp{scroll-margin-top:140px}
 /* ---------- shops ---------- */
 .shops{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(24px,4vw,56px);align-items:start}
@@ -517,6 +517,7 @@ footer .links a{display:inline-flex;align-items:center;min-height:44px}
       <p data-i18n="oatD">Não pagas nada a mais por trocar o leite animal. É grátis e sempre será!</p></div>
     </aside>
   </section>
+  <div id="mtoolsSentinel" aria-hidden="true"></div>
   <div class="mtools">
     <div class="chips" role="group" aria-label="Filtrar menu" data-i18n-aria="filterMenu" id="menuFilters"></div>
     <div class="mtools-r">
@@ -888,11 +889,22 @@ function go(r,focus){
   if(!ROUTES.includes(r)) r="at";
   const changed=r!==route; route=r;
   document.body.dataset.route=r;
+  requestAnimationFrame(headerPush);
   $$(".view").forEach(v=>v.hidden=v.dataset.view!==r);
   $$("[data-r]").forEach(a=>a.dataset.r===r?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
   document.title=t("titles")[r];
   if(focus&&changed){window.scrollTo(0,0);const h=$("#view-"+r+" h1");h&&h.focus({preventScroll:true});}
 }
+function headerPush(){
+  const de=document.documentElement;
+  if(route!=="menu"){de.style.setProperty("--hs","0px");return;}
+  const hh=$(".top").offsetHeight, st=$("#mtoolsSentinel").getBoundingClientRect().top+scrollY;
+  const hs=Math.min(hh,Math.max(0,scrollY-(st-hh)));
+  de.style.setProperty("--hh",hh+"px"); de.style.setProperty("--hs",hs+"px");
+}
+let hpTick=false;
+addEventListener("scroll",()=>{if(!hpTick){hpTick=true;requestAnimationFrame(()=>{hpTick=false;headerPush();});}},{passive:true});
+addEventListener("resize",headerPush);
 addEventListener("hashchange",()=>{const h=location.hash.slice(1); if(h==="main") return; go(h,true)});
 
 // mobile nav
